@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.lcov
+
+# Production
+build/
+dist/
+out/
+
+# Next.js
+.next/
+next-env.d.ts
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment variables
+.env.local
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# pnpm
+.pnpm-store/
+
+# Turborepo
+.turbo/
+
+# Temporary files
+tmp/
+temp/
+
+# Build tools
+.parcel-cache/
+.cache/
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Vercel
+.vercel
+
+# Misc
+*.pem
+.npmrc
+
+# Python Venv
+analytics/
