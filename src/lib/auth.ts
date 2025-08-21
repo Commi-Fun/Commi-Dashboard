@@ -10,7 +10,7 @@ export interface AdminPayload {
 export class AdminAuth {
   private static readonly ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '';
   private static readonly JWT_SECRET = process.env.ADMIN_JWT_SECRET || 'admin-secret-key-change-this';
-  private static readonly SESSION_DURATION = process.env.ADMIN_SESSION_DURATION || '24';
+  private static readonly SESSION_DURATION = process.env.ADMIN_SESSION_DURATION || '24h';
   private static readonly COOKIE_NAME = 'admin-token';
 
   static async verifyPassword(password: string): Promise<boolean> {
@@ -34,7 +34,7 @@ export class AdminAuth {
     const jwt = await new SignJWT({ ...payload })
       .setProtectedHeader({ alg })
       .setIssuedAt()
-      .setExpirationTime(`${this.SESSION_DURATION}h`)
+      .setExpirationTime(`${this.SESSION_DURATION}`)
       .sign(secret);
     
     return jwt;
