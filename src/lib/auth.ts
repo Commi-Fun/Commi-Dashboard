@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs';
+import { Bcrypt } from 'oslo/password';
 import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 
@@ -20,7 +20,8 @@ export class AdminAuth {
     }
     console.log("ADMIN_PASSWORD_HASH:", this.ADMIN_PASSWORD_HASH);
     try {
-      return await bcrypt.compare(password, this.ADMIN_PASSWORD_HASH);
+      const bcrypt = new Bcrypt({ cost: 12 });
+      return await bcrypt.verify(this.ADMIN_PASSWORD_HASH, password);
     } catch (error) {
       console.error('Password verification error:', error);
       return false;
