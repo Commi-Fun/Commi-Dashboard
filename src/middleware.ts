@@ -24,18 +24,23 @@ export async function middleware(request: NextRequest) {
 
   // Check authentication for all other routes
   let isAuthenticated = false;
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-  if (token) {
-    const secret = new TextEncoder().encode(JWT_SECRET);
-    const { payload }  = await jwtVerify(
-      token, secret, {
-        algorithms: ['HS256']
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(COOKIE_NAME)?.value;
+    if (token) {
+      const secret = new TextEncoder().encode(JWT_SECRET);
+      const { payload } = await jwtVerify(
+        token, secret, {
+          algorithms: ['HS256']
+        }
+      );
+      if (payload.timestamp && payload.role) {
+        isAuthenticated = true;
       }
-    );
-    if (payload.timestamp && payload.role) {
-      isAuthenticated = true;
     }
+  } catch (error) {
+    console.error('Middleware auth error:', error);
+    isAuthenticated = false;
   }
 
   if (!isAuthenticated) {

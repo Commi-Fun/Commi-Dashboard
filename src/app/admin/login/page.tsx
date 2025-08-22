@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
 import { 
   Box, 
   Button, 
@@ -18,7 +17,6 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -35,9 +33,8 @@ export default function AdminLogin() {
       const data = await response.json();
 
       if (response.ok) {
-        // Redirect to dashboard
-        router.push('/');
-        router.refresh();
+        // Force a hard navigation to ensure cookies are properly set
+        window.location.href = '/';
       } else {
         setError(data.error || 'Invalid password');
         setPassword('');
