@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack --port 3002",
     "build": "prisma generate --schema=./prisma/schema.prisma && next build",
-    "start": "next start --port 3002",
+    "start": "prisma generate --schema=./prisma/schema.prisma && next build && next start --port 3002",
     "lint": "next lint",
     "clean": "rimraf .next node_modules",
     "prisma:generate": "prisma generate --schema=./prisma/schema.prisma",
