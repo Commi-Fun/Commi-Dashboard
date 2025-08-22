@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AdminAuth, RateLimiter } from '@/lib/auth';
+import { cookies } from 'next/headers';
 
 export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
@@ -50,16 +51,50 @@ export async function POST(request: NextRequest) {
       timestamp: Date.now()
     };
 
-    // Set session cookie
-    await AdminAuth.setSession(payload);
+    // Generate token
+    const token = await AdminAuth.generateToken(payload);
+    
+    // Parse duration for cookie maxAge
+    let maxAge = 24 * 60 * 60; // Default 24 hours in seconds
+    const duration = process.env.ADMIN_SESSION_DURATION || "24h";
+    if (typeof duration === 'string') {
+      const match = duration.match(/^(\d+)([hms])$/);
+      if (match) {
+        const value = parseInt(match[1]);
+        const unit = match[2];
+        if (unit === 'h') maxAge = value * 60 * 60;
+        else if (unit === 'm') maxAge = value * 60;
+        else if (unit === 's') maxAge = value;
+      }
+    }
 
-    return NextResponse.json(
+    // Create response
+    const response = NextResponse.json(
       { 
         success: true,
         message: 'Login successful'
       },
       { status: 200 }
     );
+
+    // Set cookie using response.cookies for better production compatibility
+    // In production with HTTPS, we can use 'none' for cross-site requests
+    // In development, use 'lax' for same-site requests
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    response.cookies.set({
+      name: 'admin-token',
+      value: token,
+      httpOnly: true,
+      secure: isProduction, // Must be true when sameSite is 'none'
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: maxAge,
+      path: '/',
+      // Add domain if needed for production (uncomment and adjust if needed)
+      // domain: isProduction ? '.yourdomain.com' : undefined
+    });
+
+    return response;
 
   } catch (error) {
     console.error('Admin login error:', error);

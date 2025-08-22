@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { jwtVerify } from "jose";
 
 const COOKIE_NAME = 'admin-token';
@@ -25,8 +24,9 @@ export async function middleware(request: NextRequest) {
   // Check authentication for all other routes
   let isAuthenticated = false;
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(COOKIE_NAME)?.value;
+    // Try to get token from cookies
+    const token = request.cookies.get(COOKIE_NAME)?.value;
+    
     if (token) {
       const secret = new TextEncoder().encode(JWT_SECRET);
       const { payload } = await jwtVerify(
