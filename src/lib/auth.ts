@@ -1,5 +1,5 @@
 import "server-only";
-import { SignJWT } from "jose";
+import { SignJWT, jwtVerify } from "jose";
 import { cookies } from 'next/headers';
 import bcrypt from "bcryptjs";
 
@@ -19,7 +19,6 @@ export class AdminAuth {
       console.error('ADMIN_PASSWORD_HASH not configured');
       return false;
     }
-    console.log("ADMIN_PASSWORD_HASH:", this.ADMIN_PASSWORD_HASH);
     try {
       return await bcrypt.compare(password, this.ADMIN_PASSWORD_HASH);
     } catch (error) {
@@ -41,12 +40,47 @@ export class AdminAuth {
     return jwt;
   }
 
+  static async verifyToken(token: string): Promise<AdminPayload | null> {
+    try {
+      const secret = new TextEncoder().encode(this.JWT_SECRET);
+      const { payload } = await jwtVerify(token, secret, {
+        algorithms: ['HS256']
+      });
+      return { role: payload.role, timestamp: payload.timestamp } as AdminPayload;
+    } catch (error) {
+      console.error('Token verification error:', error);
+      return null;
+    }
+  }
+
+  static async getSession(): Promise<AdminPayload | null> {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(this.COOKIE_NAME);
+    
+    if (!token) {
+      return null;
+    }
+    
+    return await this.verifyToken(token.value);
+  }
+
   static async setSession(payload: AdminPayload): Promise<void> {
     const token = await this.generateToken(payload);
     const cookieStore = await cookies();
     
-    // Calculate max age in seconds (SESSION_DURATION is in hours)
-    const maxAge = Number(this.SESSION_DURATION);
+    // Parse duration string (e.g., "24h" -> 24 hours in seconds)
+    let maxAge = 24 * 60 * 60; // Default to 24 hours in seconds
+    const duration = this.SESSION_DURATION;
+    if (typeof duration === 'string') {
+      const match = duration.match(/^(\d+)([hms])$/);
+      if (match) {
+        const value = parseInt(match[1]);
+        const unit = match[2];
+        if (unit === 'h') maxAge = value * 60 * 60;
+        else if (unit === 'm') maxAge = value * 60;
+        else if (unit === 's') maxAge = value;
+      }
+    }
     
     cookieStore.set(this.COOKIE_NAME, token, {
       httpOnly: true,
@@ -60,6 +94,11 @@ export class AdminAuth {
   static async clearSession(): Promise<void> {
     const cookieStore = await cookies();
     cookieStore.delete(this.COOKIE_NAME);
+  }
+
+  static async isAuthenticated(): Promise<boolean> {
+    const session = await this.getSession();
+    return session !== null;
   }
 }
 

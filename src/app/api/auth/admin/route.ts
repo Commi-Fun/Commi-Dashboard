@@ -27,8 +27,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    password = password?.trim();
-    console.log("Obtain password:", password);
 
     // Verify password
     const isValid = await AdminAuth.verifyPassword(password);
