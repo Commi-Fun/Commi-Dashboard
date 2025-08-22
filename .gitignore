@@ -62,6 +62,7 @@ temp/
 *.sqlite
 *.sqlite3
 *.db
+prisma-client/
 
 # Vercel
 .vercel
