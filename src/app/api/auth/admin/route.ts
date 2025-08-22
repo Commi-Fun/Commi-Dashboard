@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AdminAuth, RateLimiter } from '@/lib/auth';
 
+export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
   try {
     
@@ -71,31 +72,31 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint to check auth status
-export async function GET() {
-  try {
-    const session = await AdminAuth.getSession();
+// // GET endpoint to check auth status
+// export async function GET() {
+//   try {
+//     const session = await AdminAuth.getSession();
     
-    if (!session) {
-      return NextResponse.json(
-        { authenticated: false },
-        { status: 401 }
-      );
-    }
+//     if (!session) {
+//       return NextResponse.json(
+//         { authenticated: false },
+//         { status: 401 }
+//       );
+//     }
 
-    return NextResponse.json(
-      { 
-        authenticated: true,
-        role: session.role,
-        timestamp: session.timestamp
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error('Auth check error:', error);
-    return NextResponse.json(
-      { authenticated: false },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json(
+//       { 
+//         authenticated: true,
+//         role: session.role,
+//         timestamp: session.timestamp
+//       },
+//       { status: 200 }
+//     );
+//   } catch (error) {
+//     console.error('Auth check error:', error);
+//     return NextResponse.json(
+//       { authenticated: false },
+//       { status: 500 }
+//     );
+//   }
+// }

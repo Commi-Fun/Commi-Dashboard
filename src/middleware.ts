@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AdminAuth } from '@/lib/auth';
+import { cookies } from 'next/headers';
+import { jwtVerify } from "jose";
+
+const COOKIE_NAME = 'admin-token';
+const JWT_SECRET = process.env.ADMIN_JWT_SECRET || 'admin-secret-key-change-this';
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -19,7 +23,20 @@ export async function middleware(request: NextRequest) {
   }
 
   // Check authentication for all other routes
-  const isAuthenticated = await AdminAuth.isAuthenticated();
+  let isAuthenticated = false;
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
+  if (token) {
+    const secret = new TextEncoder().encode(JWT_SECRET);
+    const { payload }  = await jwtVerify(
+      token, secret, {
+        algorithms: ['HS256']
+      }
+    );
+    if (payload.timestamp && payload.role) {
+      isAuthenticated = true;
+    }
+  }
 
   if (!isAuthenticated) {
     // Redirect to login page
